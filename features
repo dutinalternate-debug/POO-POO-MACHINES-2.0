@@ -1,0 +1,60 @@
+training_data = [
+    ("I love this game", 1),
+    ("This game is amazing", 1),
+    ("What a great play", 1),
+    ("I really like this", 1),
+    ("This is awesome", 1),
+    ("I hate this game", 0),
+    ("This is terrible", 0),
+    ("What a bad play", 0),
+    ("I really dislike this", 0),
+    ("This is awful", 0)
+]
+
+vocab = []
+for text, label in training_data:
+    for i in text.lower().split():
+        if i not in vocab:
+            vocab.append(i)
+positive = 1
+negative = 0
+weights = [0] * len(vocab)
+bias = 0
+lr = 0.1
+
+
+def sentence_to_vector(sentence, vocab):
+    sentence_words = sentence.lower().split()
+    vector = []
+    for word in vocab:
+        if word in sentence_words:
+            vector.append(1)
+        else:
+            vector.append(0)
+    return vector
+
+
+
+def predict(feature, weights, bias):
+    total = sum(f * w for f, w in zip(feature, weights)) + bias
+    if total >= 0:
+        return 1
+    else:
+        return 0
+    
+
+for epochs in range(50):
+    for words, correct in training_data:
+        features = sentence_to_vector(words, vocab)
+        prediction = predict(features, weights, bias)
+        error = correct - prediction
+        
+        for i in range(len(weights)):
+            weights[i] += lr * error * features[i]
+        bias = lr * error
+
+test_sentences = ["I love this", "This is terrible", "What a great play"]
+for tests in test_sentences:
+    features = sentence_to_vector(tests, vocab)
+    guess = predict(features, weights, bias)
+    print(f"{tests} → {'positive' if guess == 1 else 'negative'}")
